@@ -1,0 +1,26 @@
+{
+  "name": "suckit",
+  "version": "0.0.0",
+  "description": "Suck up a data stream and store it in LevelDB",
+  "main": "suckit.js",
+  "bin": {
+    "suckit": "./bin/suckit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/deoxxa/suckit.git"
+  },
+  "keywords": [
+    "data",
+    "store",
+    "stream",
+    "network",
+    "leveldb"
+  ],
+  "author": "Conrad Pankoff <deoxxa@fknsrs.biz> (http://www.fknsrs.biz/)",
+  "license": "BSD",
+  "dependencies": {
+    "level-store": "~1.5.2",
+    "leg": "~1.0.0"
+  }
+}
