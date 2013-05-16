@@ -15,6 +15,8 @@ var Suckit = module.exports = function Suckit(options) {
   this.dataPath = options.dataPath || os.tmpdir();
   this.buckets = {};
 
+  this.timeout = 0;
+
   this.on("request", this.onRequest.bind(this));
 };
 Suckit.prototype = Object.create(http.Server.prototype);
