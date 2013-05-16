@@ -1,6 +1,6 @@
 {
   "name": "suckit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Suck up a data stream and store it in LevelDB",
   "main": "suckit.js",
   "bin": {
