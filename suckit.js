@@ -58,6 +58,41 @@ Suckit.prototype.onRequest = function onRequest(req, res) {
 
   var bucket = this.getBucket(bucketName);
 
+  if (req.method === "GET" && bucketName && !fileName) {
+    this.emit("log", "info", "getting list", {session: this.sessionId, request: requestId, bucket: bucketName});
+
+    var keyStream = bucket.db.createKeyStream();
+
+    keyStream.on("error", function(err) {
+      this.emit("log", "error", "error getting list", {session: this.sessionId, request: requestId, bucket: bucketName, err: err.message});
+      res.writeHead(500);
+      return res.end();
+    });
+
+    var writtenHead = false,
+        seen = {};
+
+    keyStream.on("data", function(key) {
+      if (!writtenHead) {
+        this.emit("log", "info", "serving list", {session: this.sessionId, request: requestId, bucket: bucketName});
+        res.writeHead(200, {"content-type": "text/plain"});
+        writtenHead = true;
+      }
+
+      var f = key.split(" ").shift();
+      if (!seen[f]) {
+        seen[f] = true;
+        res.write(f + "\n");
+      }
+    });
+
+    keyStream.on("end", function() {
+      res.end();
+    });
+
+    return;
+  }
+
   if (req.method === "GET" && bucketName && fileName) {
     this.emit("log", "info", "getting entry", {session: this.sessionId, request: requestId, bucket: bucketName, file: fileName});
 
