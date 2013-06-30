@@ -20,7 +20,8 @@
   "author": "Conrad Pankoff <deoxxa@fknsrs.biz> (http://www.fknsrs.biz/)",
   "license": "BSD",
   "dependencies": {
-    "level-store": "~1.5.2",
-    "leg": "~1.0.0"
+    "leg": "~1.0.0",
+    "level-store": "~3.4.1",
+    "level": "~0.10.0"
   }
 }

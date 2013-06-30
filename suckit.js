@@ -1,4 +1,5 @@
 var http = require("http"),
+    level = require("level"),
     os = require("os"),
     path = require("path"),
     store = require("level-store"),
@@ -25,7 +26,9 @@ Suckit.prototype.getBucket = function getBucket(name) {
   if (!this.buckets[name]) {
     this.emit("log", "info", "opening bucket", {session: this.sessionId, name: name});
 
-    this.buckets[name] = store(path.join(this.dataPath, name));
+    this.buckets[name] = {};
+    this.buckets[name].db = level(path.join(this.dataPath, name));
+    this.buckets[name].store = store(this.buckets[name].db);
   }
 
   return this.buckets[name];
@@ -58,7 +61,7 @@ Suckit.prototype.onRequest = function onRequest(req, res) {
   if (req.method === "GET" && bucketName && fileName) {
     this.emit("log", "info", "getting entry", {session: this.sessionId, request: requestId, bucket: bucketName, file: fileName});
 
-    return bucket.exists(fileName, function(err, exists) {
+    return bucket.store.exists(fileName, function(err, exists) {
       if (err) {
         this.emit("log", "error", "error checking if file exists", {session: this.sessionId, request: requestId, bucket: bucketName, file: fileName, err: err.message});
         res.writeHead(500);
@@ -73,7 +76,7 @@ Suckit.prototype.onRequest = function onRequest(req, res) {
 
       this.emit("log", "info", "beginning to serve file", {session: this.sessionId, request: requestId, bucket: bucketName, file: fileName, live: !!uri.query.live});
 
-      var file = bucket.createReadStream(fileName, {live: !!uri.query.live});
+      var file = bucket.store.createReadStream(fileName, {live: !!uri.query.live});
       file.on("end", function() {
         this.emit("log", "info", "finished serving file", {session: this.sessionId, request: requestId, bucket: bucketName, file: fileName});
       }.bind(this));
@@ -94,7 +97,7 @@ Suckit.prototype.onRequest = function onRequest(req, res) {
 
     this.emit("log", "info", "asked to write to file", {session: this.sessionId, request: requestId, bucket: bucketName, file: fileName, append: append});
 
-    return bucket.exists(fileName, function(err, exists) {
+    return bucket.store.exists(fileName, function(err, exists) {
       if (err) {
         this.emit("log", "error", "error checking if file exists", {session: this.sessionId, request: requestId, bucket: bucketName, file: fileName, err: err.message});
         res.writeHead(500);
@@ -105,7 +108,7 @@ Suckit.prototype.onRequest = function onRequest(req, res) {
 
       this.emit("log", "info", "beginning to write to file", {session: this.sessionId, request: requestId, bucket: bucketName, file: fileName, append: append, newFile: newFile});
 
-      var file = bucket.createWriteStream(fileName, {append: append});
+      var file = bucket.store.createWriteStream(fileName, {append: append});
 
       req.pipe(file);
 
