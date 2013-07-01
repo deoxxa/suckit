@@ -27,7 +27,7 @@ Suckit.prototype.getBucket = function getBucket(name) {
     this.emit("log", "info", "opening bucket", {session: this.sessionId, name: name});
 
     this.buckets[name] = {};
-    this.buckets[name].db = level(path.join(this.dataPath, name));
+    this.buckets[name].db = level(path.join(this.dataPath, name), {valueEncoding: "binary"});
     this.buckets[name].store = store(this.buckets[name].db);
   }
 
