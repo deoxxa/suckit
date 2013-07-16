@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var log = require("leg")(),
+var log = require("leg")(process.stdout),
     path = require("path"),
     suckit = require(path.join(__dirname, "..", "suckit"));
 
