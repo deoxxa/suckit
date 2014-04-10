@@ -2,17 +2,18 @@ var http = require("http"),
     level = require("level"),
     os = require("os"),
     path = require("path"),
+    randomId = require("proquint-random-id"),
     store = require("level-store"),
     url = require("url");
 
 function generateId() {
-  return [Date.now(), Math.round(Math.random() * 100000)].join("-");
+  return [Date.now(), randomId()].join("-");
 };
 
 var Suckit = module.exports = function Suckit(options) {
   http.Server.call(this);
 
-  this.sessionId = generateId();
+  this.sessionId = randomId();
   this.dataPath = options.dataPath || os.tmpdir();
   this.buckets = {};
 
@@ -35,7 +36,7 @@ Suckit.prototype.getBucket = function getBucket(name) {
 };
 
 Suckit.prototype.onRequest = function onRequest(req, res) {
-  var requestId = generateId();
+  var requestId = randomId();
 
   this.emit("log", "info", "request", {session: this.sessionId, request: requestId, method: req.method, url: req.url});
 

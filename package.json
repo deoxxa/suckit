@@ -22,6 +22,7 @@
   "dependencies": {
     "leg": "~1.0.0",
     "level-store": "~3.4.1",
-    "level": "~0.10.0"
+    "level": "~0.10.0",
+    "proquint-random-id": "0.0.1"
   }
 }
