@@ -25,7 +25,10 @@ Suckit.prototype = Object.create(http.Server.prototype);
 
 Suckit.prototype.getBucket = function getBucket(name) {
   if (!this.buckets[name]) {
-    this.emit("log", "info", "opening bucket", {session: this.sessionId, name: name});
+    this.emit("log", "info", "opening bucket", {
+      session: this.sessionId,
+      name: name,
+    });
 
     this.buckets[name] = {};
     this.buckets[name].db = level(path.join(this.dataPath, name), {valueEncoding: "binary"});
@@ -38,7 +41,12 @@ Suckit.prototype.getBucket = function getBucket(name) {
 Suckit.prototype.onRequest = function onRequest(req, res) {
   var requestId = randomId();
 
-  this.emit("log", "info", "request", {session: this.sessionId, request: requestId, method: req.method, url: req.url});
+  this.emit("log", "info", "request", {
+    session: this.sessionId,
+    request: requestId,
+    method: req.method,
+    url: req.url,
+  });
 
   if (req.method !== "GET" && req.method !== "PUT" && req.method !== "POST") {
     res.writeHead(406);
@@ -60,12 +68,21 @@ Suckit.prototype.onRequest = function onRequest(req, res) {
   var bucket = this.getBucket(bucketName);
 
   if (req.method === "GET" && bucketName && !fileName) {
-    this.emit("log", "info", "getting list", {session: this.sessionId, request: requestId, bucket: bucketName});
+    this.emit("log", "info", "getting list", {
+      session: this.sessionId,
+      request: requestId,
+      bucket: bucketName,
+    });
 
     var keyStream = bucket.db.createKeyStream();
 
     keyStream.on("error", function(err) {
-      this.emit("log", "error", "error getting list", {session: this.sessionId, request: requestId, bucket: bucketName, err: err.message});
+      this.emit("log", "error", "error getting list", {
+        session: this.sessionId,
+        request: requestId,
+        bucket: bucketName,
+        err: err.message,
+      });
       res.writeHead(500);
       return res.end();
     });
@@ -75,7 +92,11 @@ Suckit.prototype.onRequest = function onRequest(req, res) {
 
     keyStream.on("data", function(key) {
       if (!writtenHead) {
-        this.emit("log", "info", "serving list", {session: this.sessionId, request: requestId, bucket: bucketName});
+        this.emit("log", "info", "serving list", {
+          session: this.sessionId,
+          request: requestId,
+          bucket: bucketName,
+        });
         res.writeHead(200, {"content-type": "text/plain"});
         writtenHead = true;
       }
@@ -95,26 +116,53 @@ Suckit.prototype.onRequest = function onRequest(req, res) {
   }
 
   if (req.method === "GET" && bucketName && fileName) {
-    this.emit("log", "info", "getting entry", {session: this.sessionId, request: requestId, bucket: bucketName, file: fileName});
+    this.emit("log", "info", "getting entry", {
+      session: this.sessionId,
+      request: requestId,
+      bucket: bucketName,
+      file: fileName,
+    });
 
     return bucket.store.exists(fileName, function(err, exists) {
       if (err) {
-        this.emit("log", "error", "error checking if file exists", {session: this.sessionId, request: requestId, bucket: bucketName, file: fileName, err: err.message});
+        this.emit("log", "error", "error checking if file exists", {
+          session: this.sessionId,
+          request: requestId,
+          bucket: bucketName,
+          file: fileName,
+          err: err.message,
+        });
         res.writeHead(500);
         return res.end();
       }
 
       if (!exists) {
-        this.emit("log", "warn", "file doesn't exist", {session: this.sessionId, request: requestId, bucket: bucketName, file: fileName});
+        this.emit("log", "warn", "file doesn't exist", {
+          session: this.sessionId,
+          request: requestId,
+          bucket: bucketName,
+          file: fileName,
+        });
         res.writeHead(404);
         return res.end();
       }
 
-      this.emit("log", "info", "beginning to serve file", {session: this.sessionId, request: requestId, bucket: bucketName, file: fileName, live: !!uri.query.live});
+      this.emit("log", "info", "beginning to serve file", {
+        session: this.sessionId,
+        request: requestId,
+        bucket: bucketName,
+        file: fileName,
+        live: !!uri.query.live,
+      });
 
       var file = bucket.store.createReadStream(fileName, {live: !!uri.query.live});
       file.on("end", function() {
-        this.emit("log", "info", "finished serving file", {session: this.sessionId, request: requestId, bucket: bucketName, file: fileName});
+        this.emit("log", "info", "finished serving file", {
+          session: this.sessionId,
+          request: requestId,
+          bucket: bucketName,
+          file: fileName,
+        });
       }.bind(this));
 
       res.writeHead(200, {"content-type": "application/octet-stream"});
@@ -125,39 +173,75 @@ Suckit.prototype.onRequest = function onRequest(req, res) {
   if (req.method === "POST" && bucketName && !fileName) {
     fileName = generateId();
 
-    this.emit("log", "info", "generated file name", {session: this.sessionId, request: requestId, bucket: bucketName, file: fileName});
+    this.emit("log", "info", "generated file name", {
+      session: this.sessionId,
+      request: requestId,
+      bucket: bucketName,
+      file: fileName,
+    });
   }
 
   if ((req.method === "POST" || req.method === "PUT") && bucketName && fileName) {
     var append = req.method === "POST";
 
-    this.emit("log", "info", "asked to write to file", {session: this.sessionId, request: requestId, bucket: bucketName, file: fileName, append: append});
+    this.emit("log", "info", "asked to write to file", {
+      session: this.sessionId,
+      request: requestId,
+      bucket: bucketName,
+      file: fileName,
+      append: append,
+    });
 
     return bucket.store.exists(fileName, function(err, exists) {
       if (err) {
-        this.emit("log", "error", "error checking if file exists", {session: this.sessionId, request: requestId, bucket: bucketName, file: fileName, err: err.message});
+        this.emit("log", "error", "error checking if file exists", {
+          session: this.sessionId,
+          request: requestId,
+          bucket: bucketName,
+          file: fileName,
+          err: err.message,
+        });
         res.writeHead(500);
         return res.end();
       }
 
       var newFile = !exists;
 
-      this.emit("log", "info", "beginning to write to file", {session: this.sessionId, request: requestId, bucket: bucketName, file: fileName, append: append, newFile: newFile});
+      this.emit("log", "info", "beginning to write to file", {
+        session: this.sessionId,
+        request: requestId,
+        bucket: bucketName,
+        file: fileName,
+        append: append,
+        newFile: newFile,
+      });
 
       var file = bucket.store.createWriteStream(fileName, {append: append});
 
       req.pipe(file);
 
       req.on("end", function() {
-        this.emit("log", "info", "finished writing to file", {session: this.sessionId, request: requestId, bucket: bucketName, file: fileName, append: append, newFile: newFile});
+        this.emit("log", "info", "finished writing to file", {
+          session: this.sessionId,
+          request: requestId,
+          bucket: bucketName,
+          file: fileName,
+          append: append,
+          newFile: newFile,
+        });
         res.writeHead(newFile ? 201 : 200, {location: ["", bucketName, fileName].join("/")});
         res.end();
       }.bind(this));
     }.bind(this));
   }
 
-  this.emit("log", "warn", "unrecognised request", {session: this.sessionId, request: requestId, method: req.method, bucket: bucketName, file: fileName});
-
+  this.emit("log", "warn", "unrecognised request", {
+    session: this.sessionId,
+    request: requestId,
+    method: req.method,
+    bucket: bucketName,
+    file: fileName,
+  });
   res.writeHead(406);
   res.end();
 };
