@@ -4,15 +4,21 @@ var log = require("leg")(process.stdout),
     path = require("path"),
     suckit = require(path.join(__dirname, "..", "suckit"));
 
-if (process.argv.length >= 4) {
-  var server = suckit.createServer({dataPath: path.join(process.cwd(), process.argv[3])});
-
-  server.on("log", log);
-
-  server.listen(process.argv[2], function() {
-    log.info("started", {session: this.sessionId, dataPath: this.dataPath, port: this.address().port});
-  });
-} else {
+if (process.argv.length < 4) {
   console.log("usage: suckit <port> <path>");
   process.exit(1);
 }
+
+var server = suckit.createServer({
+  dataPath: path.join(process.cwd(), process.argv[3]),
+});
+
+server.on("log", log);
+
+server.listen(process.argv[2], function() {
+  return log.info("started", {
+    session: this.sessionId,
+    dataPath: this.dataPath,
+    port: this.address().port,
+  });
+});
